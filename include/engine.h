@@ -39,7 +39,7 @@ class StorageEngine {
 public:
   virtual ~StorageEngine() = default;
 
-  virtual StorageResult get(const std::string &) = 0;
+  virtual StorageResult get(const std::string &) const = 0;
 
   virtual StorageStatus set(const std::string &,
                             const std::vector<std::uint8_t> &) = 0;

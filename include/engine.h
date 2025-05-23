@@ -11,7 +11,7 @@
 enum class StorageStatus {
   OK,
   NotFound,
-  Unexpected,
+  WalError,
 };
 
 struct StorageResult {
@@ -31,8 +31,8 @@ public:
   }
 
 private:
-  StorageStatus status_;
   std::optional<std::vector<std::uint8_t>> data_;
+  StorageStatus status_;
 };
 
 class StorageEngine {

@@ -2,6 +2,7 @@
 #define IN_MEMORY_ENGINE
 
 #include "engine.h"
+#include "wal.h"
 #include <shared_mutex>
 #include <unordered_map>
 
@@ -20,6 +21,7 @@ public:
 private:
   std::unordered_map<std::string, std::vector<std::uint8_t>> store_;
   mutable std::shared_mutex store_mutex_;
+  WalManager wal_;
 };
 
 #endif

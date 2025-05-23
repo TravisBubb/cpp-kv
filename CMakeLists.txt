@@ -11,12 +11,12 @@ list(FILTER SRC_FILES EXCLUDE REGEX ".*/main\\.cpp$")
 # === Build the core library ===
 add_library(core STATIC ${SRC_FILES})
 target_include_directories(core PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_compile_options(core PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(core PRIVATE -Wall -Wextra -Wpedantic -g)
 
 # === Build the main application ===
 add_executable(app ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_link_libraries(app PRIVATE core)
-target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic -g)
 
 # === GoogleTest setup ===
 enable_testing()

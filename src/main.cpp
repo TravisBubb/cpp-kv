@@ -18,6 +18,5 @@ int main() {
   } else {
     std::printf("Received error status\n");
   }
-
   return 0;
 }

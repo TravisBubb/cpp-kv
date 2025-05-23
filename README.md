@@ -53,22 +53,11 @@ cd cpp-kv
 mkdir build && cd build
 cmake ..
 make
-
----
-
-## 📘 Documentation (WIP)
-
-Detailed technical design docs, diagrams, and component breakdowns can be found in the /docs directory. These documents cover:
-
-- WAL structure and replay
-- Coordinator request flow
-- Cluster communication protocols
-- Replication design
-- Persistence architecture (Memtable + SSTable)
+```
 
 ---
 
 ## 🤝 Contributing
 
 While this project is primarily for personal/educational use, contributions,
-feedback, and code reviews are always welcome. Feel free to open issues or PRs.
+feedback, and code reviews are always welcome. Feel free to open issues or PRs!

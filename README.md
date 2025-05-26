@@ -10,7 +10,7 @@ A high-performance, distributed key-value store written in C++. This project is 
 
 ### MVP
 - [x] In-memory key-value storage (string keys, binary data)
-- [ ] Write-Ahead Log (WAL) for simple persistence and crash recovery
+- [x] Write-Ahead Log (WAL) for simple persistence and crash recovery
 - [ ] Coordinator node with REST API
 - [ ] Basic cluster discovery mechanism
 - [ ] Leader-follower replication

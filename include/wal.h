@@ -73,6 +73,10 @@ public:
   /// @returns OK if successful, otherwise an error type
   std::future<WalResult> remove(const std::string &key);
 
+  /// @brief Streams all entries in the WAL file and performs the callback on
+  /// them
+  void stream_entries(std::function<void(const WalEntry &)> callback);
+
 private:
   /// @brief Infinitely process all incoming commands
   void handle_writes();

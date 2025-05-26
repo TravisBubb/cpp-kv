@@ -6,8 +6,11 @@
 #include <optional>
 #include <thread>
 
+void write_entry(std::ofstream &f, const WalEntry &entry);
+void read_entry(std::ifstream &f, WalEntry &entry);
+
 WalManager::WalManager() {
-  std::cout << "[DEBUG] Opening WAL file\n";
+  std::cout << "[DEBUG] Opening WAL file for writing\n";
   wstream_ = std::ofstream("testwal.bin", std::ios::binary | std::ios::app);
   if (!wstream_)
     throw std::runtime_error("Failed to open file");
@@ -46,6 +49,19 @@ std::future<WalResult> WalManager::remove(const std::string &key) {
   return future;
 }
 
+void WalManager::stream_entries(
+    std::function<void(const WalEntry &)> callback) {
+  std::ifstream f("testwal.bin", std::ios::binary);
+  if (!f)
+    throw new std::runtime_error("Failed to open WAL file");
+
+  WalEntry entry;
+  while (f.peek() != EOF) {
+    read_entry(f, entry);
+    callback(entry);
+  }
+}
+
 void WalManager::handle_writes() {
   while (true) {
     std::optional<WalCommand> received = ch_.receive();
@@ -72,22 +88,6 @@ void WalManager::handle_cmd(WalCommand &cmd) {
   }
 }
 
-/// @brief Writes a WalEntry to the given file stream
-void write_entry(std::ofstream &f, const WalEntry &entry) {
-  write_bytes(f, entry.type);
-  write_bytes(f, entry.key);
-  write_bytes(f, entry.data);
-  f.flush();
-  std::cout << "[DEBUG] write_entry finished" << std::endl;
-}
-
-/// @brief Reads a WalEntry from the given file stream
-void read_entry(std::ifstream &f, WalEntry &entry) {
-  read_bytes(f, entry.type);
-  read_bytes(f, entry.key);
-  read_bytes(f, entry.data);
-}
-
 /// @brief Writes a SET entry to the WAL file
 void WalManager::handle_set(WalCommand &cmd) {
   std::cout << "[DEBUG] handle_set invoked\n";
@@ -103,4 +103,20 @@ void WalManager::handle_remove(WalCommand &cmd) {
       .type = WalCommandType::Remove, .key = cmd.key(), .data = {}};
   write_entry(wstream_, entry);
   cmd.promise().set_value(WalResult::OK);
+}
+
+/// @brief Writes a WalEntry to the given file stream
+void write_entry(std::ofstream &f, const WalEntry &entry) {
+  write_bytes(f, entry.type);
+  write_bytes(f, entry.key);
+  write_bytes(f, entry.data);
+  f.flush();
+  std::cout << "[DEBUG] write_entry finished" << std::endl;
+}
+
+/// @brief Reads a WalEntry from the given file stream
+void read_entry(std::ifstream &f, WalEntry &entry) {
+  read_bytes(f, entry.type);
+  read_bytes(f, entry.key);
+  read_bytes(f, entry.data);
 }

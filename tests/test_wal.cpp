@@ -1,10 +1,8 @@
 #include "../include/serialization.h"
 #include "../include/wal.h"
-#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
-#include <thread>
 
 namespace fs = std::filesystem;
 
@@ -13,6 +11,7 @@ const std::string WAL_FILE = "testwal.bin";
 WalEntry read_entry(std::ifstream &f);
 std::vector<WalEntry> read_all_entries(const std::string &path);
 void delete_wal_file();
+void initialize_wal_file(const std::vector<WalEntry> &entries);
 
 class WalManagerTest : public ::testing::Test {
 protected:
@@ -102,6 +101,28 @@ TEST_F(WalManagerTest, HandlesLargeData) {
   EXPECT_EQ(entries[0].data, big_data);
 }
 
+TEST_F(WalManagerTest, CanStreamEntries) {
+  WalManager wal;
+
+  std::vector<WalEntry> original_entries = {
+      {WalCommandType::Set, "key1", {'v', 'a', 'l', '1'}},
+      {WalCommandType::Set, "key2", {'v', 'a', 'l', '2'}},
+      {WalCommandType::Set, "key3", {'v', 'a', 'l', '3'}}};
+
+  initialize_wal_file(original_entries);
+
+  std::vector<WalEntry> streamed_entries;
+  wal.stream_entries(
+      [&](const WalEntry &entry) { streamed_entries.push_back(entry); });
+
+  ASSERT_EQ(streamed_entries.size(), 3);
+  for (size_t i = 0; i < original_entries.size(); ++i) {
+    EXPECT_EQ(streamed_entries[i].type, original_entries[i].type);
+    EXPECT_EQ(streamed_entries[i].key, original_entries[i].key);
+    EXPECT_EQ(streamed_entries[i].data, original_entries[i].data);
+  }
+}
+
 WalEntry read_entry(std::ifstream &f) {
   WalEntry e;
   read_bytes(f, e.type);
@@ -126,4 +147,17 @@ void delete_wal_file() {
   if (fs::exists(WAL_FILE)) {
     fs::remove(WAL_FILE);
   }
+}
+
+void initialize_wal_file(const std::vector<WalEntry> &entries) {
+  std::ofstream f(WAL_FILE, std::ios::binary);
+  ASSERT_TRUE(f.is_open());
+
+  for (const auto &entry : entries) {
+    write_bytes(f, entry.type);
+    write_bytes(f, entry.key);
+    write_bytes(f, entry.data);
+  }
+
+  f.close();
 }

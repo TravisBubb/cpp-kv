@@ -2,7 +2,8 @@
 #define SERIALIZATION_H
 
 #include <cstdint>
-#include <fstream>
+#include <istream>
+#include <ostream>
 #include <type_traits>
 #include <vector>
 

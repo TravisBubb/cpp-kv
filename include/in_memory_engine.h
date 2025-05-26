@@ -11,6 +11,7 @@ public:
   InMemoryStorageEngine() = default;
   ~InMemoryStorageEngine() override = default;
 
+  StorageResult hydrate();
   StorageResult get(const std::string &key) const override;
   StorageStatus set(const std::string &key,
                     const std::vector<std::uint8_t> &data) override;

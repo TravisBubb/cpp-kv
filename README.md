@@ -1,5 +1,7 @@
 # Distributed Key-Value Store (C++)
 
+[![CI](https://github.com/TravisBubb/cpp-kv/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/TravisBubb/cpp-kv/actions/workflows/unit_tests.yml)
+
 A high-performance, distributed key-value store written in C++. This project is designed as both a practical storage system and a learning exploration of the architecture of distributed storage systems.
 
 ---

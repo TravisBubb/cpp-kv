@@ -3,6 +3,7 @@
 
 #include "channel.h"
 #include <cstdint>
+#include <fstream>
 #include <future>
 #include <optional>
 #include <string>
@@ -11,10 +12,17 @@
 
 /// @brief Represents a type of command that can be sent from the WAL producers
 /// to the consumer
-enum class WalCommandType { Set, Remove, Flush, Shutdown };
+enum class WalCommandType : uint8_t { Set, Remove };
 
 /// @brief Represents the result of an interaction with the WAL
 enum class WalResult { OK, IOError };
+
+/// @brief Represents a single entry in the WAL
+struct WalEntry {
+  WalCommandType type;
+  std::string key;
+  std::vector<uint8_t> data;
+};
 
 /// @brief Represents a command to send from the WAl producers to the consumer
 class WalCommand {
@@ -66,10 +74,22 @@ public:
   std::future<WalResult> remove(const std::string &key);
 
 private:
+  /// @brief Infinitely process all incoming commands
   void handle_writes();
+
+  /// @brief Retrieve a WalCommand from the channel and route to the proper
+  /// handler
+  void handle_cmd(WalCommand &cmd);
+
+  /// @brief Handle the set command
+  void handle_set(WalCommand &cmd);
+
+  /// @brief Handle the remove command
+  void handle_remove(WalCommand &cmd);
 
   std::thread writer_thread_;
   Channel<WalCommand> ch_;
+  std::ofstream wstream_;
 };
 
 #endif

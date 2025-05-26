@@ -3,7 +3,7 @@
 
 int main() {
   auto engine = InMemoryStorageEngine();
-  std::string v1 = "v1";
+  std::string v1 = "{ \"name\": \"travis\" }";
   std::printf("Setting k1:v1\n");
   engine.set("k1", std::vector<uint8_t>(v1.begin(), v1.end()));
   StorageResult res = engine.get("k1");

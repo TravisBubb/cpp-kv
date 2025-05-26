@@ -3,6 +3,7 @@ project(KVStore, LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # === Gather src files, excluding main.cpp ===
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)

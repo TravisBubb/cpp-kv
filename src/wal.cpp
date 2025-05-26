@@ -1,22 +1,24 @@
 #include "../include/wal.h"
+#include "../include/serialization.h"
 #include <exception>
 #include <future>
+#include <iostream>
 #include <optional>
 #include <thread>
 
 WalManager::WalManager() {
+  std::cout << "[DEBUG] Opening WAL file\n";
+  wstream_ = std::ofstream("testwal.bin", std::ios::binary | std::ios::app);
+  if (!wstream_)
+    throw std::runtime_error("Failed to open file");
+
+  std::cout << "[DEBUG] Starting writer thread\n";
   writer_thread_ = std::thread([this]() { handle_writes(); });
 }
 
 WalManager::~WalManager() {
   std::promise<WalResult> promise;
   std::future<WalResult> future = promise.get_future();
-
-  // Send the shutdown command to the worker thread
-  printf("Sending shutdown cmd to worker thread\n");
-  WalCommand cmd(WalCommandType::Shutdown, std::move(promise));
-  ch_.send(std::move(cmd));
-  WalResult _ = future.get();
 
   // Close the channel
   printf("Closing channel\n");
@@ -51,27 +53,54 @@ void WalManager::handle_writes() {
       break;
 
     WalCommand &cmd = received.value();
-    try {
-      switch (cmd.get_type()) {
-      case WalCommandType::Set:
-        printf("Set received...\n");
-        cmd.promise().set_value(WalResult::OK);
-        break;
-      case WalCommandType::Remove:
-        printf("Remove received...\n");
-        cmd.promise().set_value(WalResult::OK);
-        break;
-      case WalCommandType::Flush:
-        printf("Flush received...\n");
-        cmd.promise().set_value(WalResult::OK);
-        break;
-      case WalCommandType::Shutdown:
-        printf("Shutdown received...\n");
-        cmd.promise().set_value(WalResult::OK);
-        break;
-      }
-    } catch (...) {
-      cmd.promise().set_exception(std::current_exception());
-    }
+    handle_cmd(cmd);
   }
+}
+
+void WalManager::handle_cmd(WalCommand &cmd) {
+  try {
+    switch (cmd.get_type()) {
+    case WalCommandType::Set:
+      handle_set(cmd);
+      break;
+    case WalCommandType::Remove:
+      handle_remove(cmd);
+      break;
+    }
+  } catch (...) {
+    cmd.promise().set_exception(std::current_exception());
+  }
+}
+
+/// @brief Writes a WalEntry to the given file stream
+void write_entry(std::ofstream &f, const WalEntry &entry) {
+  write_bytes(f, entry.type);
+  write_bytes(f, entry.key);
+  write_bytes(f, entry.data);
+  f.flush();
+  std::cout << "[DEBUG] write_entry finished" << std::endl;
+}
+
+/// @brief Reads a WalEntry from the given file stream
+void read_entry(std::ifstream &f, WalEntry &entry) {
+  read_bytes(f, entry.type);
+  read_bytes(f, entry.key);
+  read_bytes(f, entry.data);
+}
+
+/// @brief Writes a SET entry to the WAL file
+void WalManager::handle_set(WalCommand &cmd) {
+  std::cout << "[DEBUG] handle_set invoked\n";
+  WalEntry entry = {
+      .type = WalCommandType::Set, .key = cmd.key(), .data = cmd.data()};
+  write_entry(wstream_, entry);
+  cmd.promise().set_value(WalResult::OK);
+}
+
+/// @brief Writes a REMOVE entry to the WAl file
+void WalManager::handle_remove(WalCommand &cmd) {
+  WalEntry entry = {
+      .type = WalCommandType::Remove, .key = cmd.key(), .data = {}};
+  write_entry(wstream_, entry);
+  cmd.promise().set_value(WalResult::OK);
 }

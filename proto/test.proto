@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package kvstore;
+
+// Simple key-value pair message
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+// Request message for getting a value by key
+message GetRequest {
+  string key = 1;
+}
+
+// Response message containing the value
+message GetResponse {
+  string value = 1;
+  bool found = 2;
+}
+
+// Service definition
+service KVStore {
+  rpc Get(GetRequest) returns (GetResponse);
+}
+

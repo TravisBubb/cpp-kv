@@ -1,5 +1,21 @@
-#include "../include/in_memory_engine.h"
-#include <cstdio>
+#include "grpcpp/server_builder.h"
+#include "in_memory_engine.h"
+#include "in_memory_storage_service.h"
+#include <iostream>
+
+void RunServer() {
+  std::string server_addr("0.0.0.0:50051");
+  InMemoryStorageServiceImpl service;
+
+  grpc::ServerBuilder builder;
+  builder.AddListeningPort(server_addr, grpc::InsecureServerCredentials());
+  builder.RegisterService(&service);
+
+  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  std::cout << "[DEBUG] Server listening on " << server_addr << std::endl;
+
+  server->Wait();
+}
 
 int main() {
   {
@@ -36,6 +52,8 @@ int main() {
   } else {
     std::printf("Received error status\n");
   }
+
+  RunServer();
 
   return 0;
 }

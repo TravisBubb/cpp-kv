@@ -1,11 +1,10 @@
 #ifndef WAL_H
 #define WAL_H
 
-#include "channel.h"
+#include "../../common/include/channel.h"
 #include <cstdint>
 #include <fstream>
 #include <future>
-#include <optional>
 #include <string>
 #include <thread>
 #include <vector>

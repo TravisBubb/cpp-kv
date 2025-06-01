@@ -59,6 +59,18 @@ make
 
 ---
 
+## 📁 Project Structure
+
+```text
+apps/           # Applications (e.g. storage node, coordinator)
+libs/           # Reusable libraries (storage logic, common utilities)
+proto/          # gRPC definitions and compiled protobuf sources
+tests/          # Integration/system tests
+cmake/          # Custom CMake modules (e.g. FetchGoogleTest)
+```
+
+---
+
 ## 🤝 Contributing
 
 While this project is primarily for personal/educational use, contributions,

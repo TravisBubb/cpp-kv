@@ -1,4 +1,6 @@
-file(GLOB PROTO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.proto")
+set(PROTO_FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/storage.proto"
+)
 
 foreach(PROTO_FILE ${PROTO_FILES})
     get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)

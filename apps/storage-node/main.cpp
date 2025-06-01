@@ -1,5 +1,42 @@
 #include "../include/in_memory_engine.h"
+#include "grpcpp/security/server_credentials.h"
+#include "grpcpp/server.h"
+#include "grpcpp/server_builder.h"
+#include "grpcpp/server_context.h"
+#include "storage.grpc.pb.h"
+#include "storage.pb.h"
 #include <cstdio>
+#include <grpcpp/support/status.h>
+#include <iostream>
+
+class StorageServiceImpl final : public storage::StorageService::Service {
+public:
+  grpc::Status Get(grpc::ServerContext *context,
+                   const storage::GetRequest *request,
+                   storage::GetResponse *response) override {
+    return grpc::Status::OK;
+  }
+
+  grpc::Status Set(grpc::ServerContext *context,
+                   const storage::SetRequest *request,
+                   storage::SetResponse *response) override {
+    return grpc::Status::OK;
+  }
+};
+
+void RunServer() {
+  std::string server_addr("0.0.0.0:50051");
+  StorageServiceImpl service;
+
+  grpc::ServerBuilder builder;
+  builder.AddListeningPort(server_addr, grpc::InsecureServerCredentials());
+  builder.RegisterService(&service);
+
+  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  std::cout << "[DEBUG] Server listening on " << server_addr << std::endl;
+
+  server->Wait();
+}
 
 int main() {
   {
@@ -36,6 +73,8 @@ int main() {
   } else {
     std::printf("Received error status\n");
   }
+
+  RunServer();
 
   return 0;
 }

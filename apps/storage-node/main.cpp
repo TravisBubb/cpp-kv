@@ -1,7 +1,18 @@
+#include "../../libs/common/include/logging.h"
 #include "grpcpp/server_builder.h"
-#include "in_memory_engine.h"
 #include "in_memory_storage_service.h"
-#include <iostream>
+#include <csignal>
+
+std::unique_ptr<grpc::Server> server;
+std::atomic<bool> shutdown_requested(false);
+
+void HandleShutdownSignal(int signum) {
+  LOG_INFO("Signal {} received. Shutting down server...", signum);
+  shutdown_requested = true;
+  if (server) {
+    server->Shutdown();
+  }
+}
 
 void RunServer() {
   std::string server_addr("0.0.0.0:50051");
@@ -11,49 +22,31 @@ void RunServer() {
   builder.AddListeningPort(server_addr, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
 
-  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-  std::cout << "[DEBUG] Server listening on " << server_addr << std::endl;
-
+  server = builder.BuildAndStart();
+  LOG_INFO("Server listening on {}", server_addr);
   server->Wait();
+  LOG_INFO("Server stopped");
 }
 
 int main() {
-  {
-    auto engine = InMemoryStorageEngine();
-    std::string v1 = "{ \"name\": \"travis\" }";
-    std::printf("Setting k1:v1\n");
-    engine.set("k1", std::vector<uint8_t>(v1.begin(), v1.end()));
-    StorageResult res = engine.get("k1");
-    if (res.get_status() == StorageStatus::OK) {
-      if (!res.get_data().has_value()) {
-        std::printf("No value found for k1\n");
-        return 1;
-      }
-      std::vector<std::uint8_t> bytes = res.get_data().value();
-      std::string str = std::string(bytes.begin(), bytes.end());
-      std::printf("Retrieved k1:%s\n", str.c_str());
-    } else {
-      std::printf("Received error status\n");
-    }
+  logging::init();
+
+  // Setup signal handler
+  std::signal(SIGINT, HandleShutdownSignal);
+  std::signal(SIGTERM, HandleShutdownSignal);
+
+  std::thread server_thread(RunServer);
+
+  while (!shutdown_requested) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  auto hydrated_engine = InMemoryStorageEngine();
-  hydrated_engine.hydrate();
-
-  StorageResult res = hydrated_engine.get("k1");
-  if (res.get_status() == StorageStatus::OK) {
-    if (!res.get_data().has_value()) {
-      std::printf("No value found for k1\n");
-      return 1;
-    }
-    std::vector<std::uint8_t> bytes = res.get_data().value();
-    std::string str = std::string(bytes.begin(), bytes.end());
-    std::printf("Retrieved k1:%s\n", str.c_str());
-  } else {
-    std::printf("Received error status\n");
+  // Wait for server thread to finish after shutdown
+  if (server_thread.joinable()) {
+    server_thread.join();
   }
 
-  RunServer();
+  LOG_INFO("Server shut down complete");
 
   return 0;
 }

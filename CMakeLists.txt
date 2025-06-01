@@ -16,6 +16,7 @@ include(FetchContent)
 # Fetch dependencies
 include(cmake/FetchGRPC.cmake)
 include(cmake/FetchGoogleTest.cmake)
+include(cmake/FetchSpdlog.cmake)
 
 # Enable testing
 include(CTest)

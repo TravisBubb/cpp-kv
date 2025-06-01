@@ -1,5 +1,6 @@
 add_executable(storage_node
     main.cpp
+    in_memory_storage_service.cpp
     ${CMAKE_BINARY_DIR}/proto/storage.pb.cc
     ${CMAKE_BINARY_DIR}/proto/storage.grpc.pb.cc
 )

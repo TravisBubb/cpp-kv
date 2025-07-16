@@ -58,7 +58,7 @@ grpc::Status InMemoryStorageServiceImpl::Set(grpc::ServerContext *,
   StorageResult result = engine_.set(key, bytes);
 
   if (result.get_status() == StorageStatus::OK) {
-    LOG_INFO("Finished processing storage.StorageService.Get request");
+    LOG_INFO("Finished processing storage.StorageService.Set request");
     return grpc::Status::OK;
   }
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0.3)
+cmake_minimum_required(VERSION 3.31)
 project(KVStore LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)

@@ -11,12 +11,18 @@ target_include_directories(storage_node
         ${grpc_SOURCE_DIR}/third_party/protobuf/src
 )
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SYSTEMD REQUIRED libsystemd)
+include_directories(${SYSTEMD_INCLUDE_DIRS})
+link_directories(${SYSTEMD_LIBRARY_DIRS})
+
 target_link_libraries(storage_node
     PRIVATE 
         storage 
         common
         grpc++
         protobuf::libprotobuf
+        ${SYSTEMD_LIBRARIES}
 )
 
 target_compile_options(storage_node PRIVATE -Wall -Wextra -Wpedantic -g)

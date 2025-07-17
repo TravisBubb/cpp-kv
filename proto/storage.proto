@@ -19,9 +19,7 @@ message SetResponse {
   }
 }
 
-message GetRequest {
-  string key = 1;
-}
+message GetRequest { string key = 1; }
 
 message GetResponse {
   oneof result {
@@ -30,9 +28,7 @@ message GetResponse {
   }
 }
 
-message Value {
-  bytes data = 1;
-}
+message Value { bytes data = 1; }
 
 message Success {}
 
@@ -40,4 +36,3 @@ message Error {
   string code = 1;
   string message = 2;
 }
-

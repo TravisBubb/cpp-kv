@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.15.0/.schema/devbox.schema.json",
+  "packages": [
+    "gcc@latest",
+    "cmake@latest",
+    "cppcheck@latest",
+    "gdb@latest",
+    "protobuf@latest",
+    "grpcurl@latest",
+    "libcap@latest",
+    "systemd@latest",
+    "pkg-config@latest",
+    "systemd.dev"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null"
+    ],
+    "scripts": {
+      "clean": "rm -rf build",
+      "build": "cmake -S . -B build && cmake --build build -- -j$(nproc)",
+      "test":  "ctest --test-dir build --output-on-failure"
+    }
+  }
+}

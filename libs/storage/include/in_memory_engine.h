@@ -17,6 +17,8 @@ public:
                     const std::vector<std::uint8_t> &data) override;
   StorageStatus set(const std::string &key,
                     std::vector<std::uint8_t> &&data) override;
+  StorageStatus replicate(const std::string &key,
+                          const std::vector<std::uint8_t> &data) override;
   StorageStatus remove(const std::string &key) override;
 
 private:

@@ -51,6 +51,14 @@ StorageStatus InMemoryStorageEngine::set(const std::string &key,
   return StorageStatus::OK;
 }
 
+StorageStatus
+InMemoryStorageEngine::replicate(const std::string &key,
+                                 const std::vector<std::uint8_t> &data) {
+  std::unique_lock lock(store_mutex_); // exclusive write lock
+  store_[key] = data;
+  return StorageStatus::OK;
+}
+
 StorageStatus InMemoryStorageEngine::remove(const std::string &key) {
   std::unique_lock lock(store_mutex_); // exclusive write lock
   WalResult wal_result = wal_.remove(key).get();

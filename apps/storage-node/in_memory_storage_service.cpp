@@ -71,3 +71,37 @@ grpc::Status InMemoryStorageServiceImpl::Set(grpc::ServerContext *,
       grpc::StatusCode::INTERNAL,
       "An unexpected error occurred attempting to store key-value pair");
 }
+
+grpc::Status
+InMemoryStorageServiceImpl::Replicate(grpc::ServerContext *,
+                                      const storage::ReplicateRequest *request,
+                                      storage::ReplicateResponse *response) {
+  LOG_INFO("Received storage.StorageService.Replicate request");
+
+  if (!request || !response) {
+    LOG_WARN("Cannot process request; Either the request or response is null");
+    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
+                        "Null request or response");
+  }
+
+  const std::string &key = request->key();
+  const storage::Value &value = request->value();
+  const std::string &data = value.data();
+  const std::vector<uint8_t> bytes(data.begin(), data.end());
+  LOG_DEBUG("Attempting to replicate key \"{}\" and value \"{}\"", key, data);
+  StorageResult result = engine_.replicate(key, bytes);
+
+  if (result.get_status() == StorageStatus::OK) {
+    LOG_INFO("Finished processing storage.StorageService.Replicate request");
+    return grpc::Status::OK;
+  }
+
+  LOG_ERROR("An unexpected error occurred attempting to process "
+            "storage.StorageService.Replicate request for key \"{}\" and value "
+            "\"{}\"",
+            key, data);
+
+  return grpc::Status(
+      grpc::StatusCode::INTERNAL,
+      "An unexpected error occurred attempting to replicate key-value pair");
+}

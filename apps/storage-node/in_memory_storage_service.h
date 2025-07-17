@@ -6,7 +6,6 @@
 #include "in_memory_engine.h"
 #include "storage.grpc.pb.h"
 #include "storage.pb.h"
-#include <cstdio>
 #include <grpcpp/support/status.h>
 
 class InMemoryStorageServiceImpl final
@@ -14,6 +13,7 @@ class InMemoryStorageServiceImpl final
 public:
   InMemoryStorageServiceImpl() = default;
   ~InMemoryStorageServiceImpl() = default;
+
   grpc::Status Get(grpc::ServerContext *context,
                    const storage::GetRequest *request,
                    storage::GetResponse *response) override;
@@ -21,6 +21,10 @@ public:
   grpc::Status Set(grpc::ServerContext *context,
                    const storage::SetRequest *request,
                    storage::SetResponse *response) override;
+
+  grpc::Status Replicate(grpc::ServerContext *context,
+                         const storage::ReplicateRequest *request,
+                         storage::ReplicateResponse *response) override;
 
 private:
   InMemoryStorageEngine engine_;

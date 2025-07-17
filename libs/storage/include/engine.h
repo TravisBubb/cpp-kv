@@ -43,7 +43,8 @@ public:
                             const std::vector<std::uint8_t> &) = 0;
   virtual StorageStatus set(const std::string &,
                             std::vector<std::uint8_t> &&) = 0;
-
+  virtual StorageStatus replicate(const std::string &,
+                                  const std::vector<std::uint8_t> &) = 0;
   virtual StorageStatus remove(const std::string &) = 0;
 };
 
